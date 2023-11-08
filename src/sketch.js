@@ -7,7 +7,6 @@ let errorPercentage;
 let elapsedTime;
 
 function setup() {
-  // put setup code here
   createCanvas(screenWidth, screenHeight);
   possibleLetters = "abcdefghijklmnopqrstuvwxyz".split("");
   textString = createString(possibleLetters, 10, 10);
@@ -19,7 +18,7 @@ function draw() {
   background(220);
   cursor.act(textString[cursor.y][cursor.x].getLoc());
   fill(0);
-  text("" + mouseX + ", " + mouseY, 100, 50);
+  text("" + mouseX + ", " + mouseY + "   " + cursor.countLimit, 100, 50);
   for (let i = 0; i < textString.length; i++) {
     for (let j = 0; j < textString[i].length; j++) {
       textString[i][j].act();
@@ -67,6 +66,7 @@ class Cursor {
     this.letterToType = letterToType;
     this.timer = 0;
     this.count = 1;
+    this.countLimit = Math.floor(Math.random() * 10) + 10;
     this.startTime = performance.now();
     this.errorCount = 0;
     this.over = false;
@@ -83,7 +83,7 @@ class Cursor {
       this.y = Math.floor(Math.random() * textString.length);
       this.letterToType = textString[this.y][this.x].getLetter();
       this.count++;
-      if (this.count == 10) {
+      if (this.count == this.countLimit) {
         let endTime = performance.now();
         elapsedTime = endTime - this.startTime;
         errorPercentage =
