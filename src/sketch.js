@@ -3,7 +3,6 @@ let possibleLetters;
 let screenWidth = window.innerWidth;
 let screenHeight = window.innerHeight;
 let cursor;
-let errorPercentage;
 let elapsedTime;
 let jumpRate;
 let frameCount;
@@ -90,7 +89,6 @@ class Cursor {
     this.x = x;
     this.y = y;
     this.letterToType = letterToType;
-    this.timer = 0;
     this.count = 0;
     this.countLimit = Math.floor(Math.random() * 10) + 15;
     this.rateOfFailure = 50;
@@ -129,7 +127,6 @@ class Cursor {
     if (this.getGameErrorPercentage() > this.rateOfFailure) {
       let endTime = performance.now();
       elapsedTime = endTime - this.startTime;
-      errorPercentage = this.getErrorPercentage();
       this.over = true;
     }
   }
@@ -140,12 +137,6 @@ class Cursor {
 
   getErrorPercentage() {
     return (this.errorCount * 100) / this.count;
-  }
-
-  getNextLoc() {
-    if (this.x > textString[y].length) {
-      return [0, this.y + 1];
-    }
   }
 }
 
