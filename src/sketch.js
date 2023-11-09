@@ -5,32 +5,47 @@ let screenHeight = window.innerHeight;
 let cursor;
 let errorPercentage;
 let elapsedTime;
+let jumpRate;
+let frameCount;
 
 function setup() {
   createCanvas(screenWidth, screenHeight);
   possibleLetters = "abcdefghijklmnopqrstuvwxyz".split("");
-  textString = createString(possibleLetters, 10, 10);
+  textString = createString(possibleLetters, 20, 20);
   cursor = new Cursor(0, 0, textString[0][0].getLetter());
   textSize(32);
+  frameRate(60);
+  jumpRate = 300;
+  frameCount = 1;
 }
 
 function draw() {
   background(220);
   cursor.act(textString[cursor.y][cursor.x].getLoc());
   fill(0);
-  text("" + mouseX + ", " + mouseY + "   " + cursor.countLimit, 100, 50);
+  text(cursor.count + " " + cursor.errorCount + " " + frameCount, 100, 50);
   for (let i = 0; i < textString.length; i++) {
     for (let j = 0; j < textString[i].length; j++) {
       textString[i][j].act();
     }
   }
+
+  frameCount++;
+  if ((frameCount %= jumpRate) <= 0.01) {
+    frameCount = 0;
+    cursor.jump(true);
+    jumpRate *= 0.95;
+    jumpRate = Math.floor(jumpRate);
+  }
+
   if (cursor.over) {
     fill(0);
-    text("You finished in " + elapsedTime / 1000 + "s", 100, 800);
-    text("You made " + cursor.errorCount + " errors", 100, 850);
+    textSize(30);
+    text("You finished in " + elapsedTime / 1000 + "s", 50, 800);
+    text("You made " + cursor.errorCount + " errors", 50, 850);
     text(
-      "Your error percentage was " + Math.round(errorPercentage) + "%",
-      100,
+      "Your final rate was " + jumpRate / frameRate() + " seconds per jump",
+      50,
       900
     );
 
@@ -65,8 +80,9 @@ class Cursor {
     this.y = y;
     this.letterToType = letterToType;
     this.timer = 0;
-    this.count = 1;
-    this.countLimit = Math.floor(Math.random() * 10) + 10;
+    this.count = 0;
+    this.countLimit = Math.floor(Math.random() * 10) + 15;
+    this.rateOfFailure = 50;
     this.startTime = performance.now();
     this.errorCount = 0;
     this.over = false;
@@ -79,20 +95,30 @@ class Cursor {
 
   type(key) {
     if (key == this.letterToType) {
-      this.x = Math.floor(Math.random() * textString[0].length);
-      this.y = Math.floor(Math.random() * textString.length);
-      this.letterToType = textString[this.y][this.x].getLetter();
-      this.count++;
-      if (this.count == this.countLimit) {
-        let endTime = performance.now();
-        elapsedTime = endTime - this.startTime;
-        errorPercentage =
-          (this.errorCount * 100) / (this.count + this.errorCount);
-        this.over = true;
-      }
+      this.jump(false);
     } else {
       this.errorCount++;
     }
+  }
+
+  jump(timeOut) {
+    this.x = Math.floor(Math.random() * textString[0].length);
+    this.y = Math.floor(Math.random() * textString.length);
+    this.letterToType = textString[this.y][this.x].getLetter();
+    this.count++;
+    if (timeOut) {
+      this.errorCount++;
+    }
+    if (this.getErrorPercentage() > this.rateOfFailure) {
+      let endTime = performance.now();
+      elapsedTime = endTime - this.startTime;
+      errorPercentage = this.getErrorPercentage();
+      this.over = true;
+    }
+  }
+
+  getErrorPercentage() {
+    return (this.errorCount * 100) / this.count;
   }
 
   getNextLoc() {
