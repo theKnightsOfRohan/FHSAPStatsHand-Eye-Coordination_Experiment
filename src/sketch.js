@@ -7,6 +7,7 @@ let errorPercentage;
 let elapsedTime;
 let jumpRate;
 let frameCount;
+let hasStarted;
 
 function setup() {
   createCanvas(screenWidth, screenHeight);
@@ -17,13 +18,34 @@ function setup() {
   frameRate(60);
   jumpRate = 300;
   frameCount = 1;
+  hasStarted = false;
 }
 
 function draw() {
   background(220);
+  if (!hasStarted) {
+    fill(0);
+    textSize(30);
+    text(
+      "Use the keyboard to type the highlighted letter.\nThe cursor will then jump to a new location.\nPress any key to start.",
+      250,
+      250
+    );
+    return;
+  }
   cursor.act(textString[cursor.y][cursor.x].getLoc());
   fill(0);
-  text(cursor.count + " " + cursor.errorCount + " " + frameCount, 100, 50);
+  text(
+    cursor.count +
+      " " +
+      cursor.errorCount +
+      " " +
+      cursor.gameErrorCount +
+      " " +
+      frameCount,
+    100,
+    50
+  );
   for (let i = 0; i < textString.length; i++) {
     for (let j = 0; j < textString[i].length; j++) {
       textString[i][j].act();
@@ -42,7 +64,7 @@ function draw() {
     fill(0);
     textSize(30);
     text("You finished in " + elapsedTime / 1000 + "s", 50, 800);
-    text("You made " + cursor.errorCount + " errors", 50, 850);
+    text("You made " + cursor.errorCount + " typing errors", 50, 850);
     text(
       "Your final rate was " + jumpRate / frameRate() + " seconds per jump",
       50,
@@ -86,6 +108,7 @@ class Cursor {
     this.startTime = performance.now();
     this.errorCount = 0;
     this.over = false;
+    this.gameErrorCount = 0;
   }
 
   act(loc) {
@@ -94,10 +117,15 @@ class Cursor {
   }
 
   type(key) {
+    if (!hasStarted) {
+      hasStarted = true;
+      return;
+    }
     if (key == this.letterToType) {
       this.jump(false);
     } else {
       this.errorCount++;
+      this.gameErrorCount++;
     }
   }
 
@@ -107,14 +135,18 @@ class Cursor {
     this.letterToType = textString[this.y][this.x].getLetter();
     this.count++;
     if (timeOut) {
-      this.errorCount++;
+      this.gameErrorCount++;
     }
-    if (this.getErrorPercentage() > this.rateOfFailure) {
+    if (this.getGameErrorPercentage() > this.rateOfFailure) {
       let endTime = performance.now();
       elapsedTime = endTime - this.startTime;
       errorPercentage = this.getErrorPercentage();
       this.over = true;
     }
+  }
+
+  getGameErrorPercentage() {
+    return (this.gameErrorCount * 100) / this.count;
   }
 
   getErrorPercentage() {
