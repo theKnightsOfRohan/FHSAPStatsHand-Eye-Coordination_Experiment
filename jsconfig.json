@@ -4,7 +4,7 @@
   },
   "include": [
     "*.js",
-    "src/**/*.js",
-    "/Users/rohanseth/.vscode/extensions/samplavigne.p5-vscode-1.2.14/p5types/global.d.ts"
+    "src/**/*.js"
+    // If you have installed the p5.js typings, add the directory to them as well
   ]
 }
