@@ -35,17 +35,6 @@ function draw() {
   }
   cursor.act(textString[cursor.y][cursor.x].getLoc());
   fill(0);
-  text(
-    cursor.count +
-      " " +
-      cursor.errorCount +
-      " " +
-      cursor.gameErrorCount +
-      " " +
-      frameCount,
-    100,
-    50
-  );
   for (let i = 0; i < textString.length; i++) {
     for (let j = 0; j < textString[i].length; j++) {
       textString[i][j].act();
