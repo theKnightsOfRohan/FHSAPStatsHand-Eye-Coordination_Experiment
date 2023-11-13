@@ -32,7 +32,6 @@ function draw() {
     );
     return;
   }
-  text("Errors: " + cursor.getRecentErrorPercentage() + "%", 50, 50);
   cursor.act(textString[cursor.y][cursor.x].getLoc());
   fill(0);
   for (let i = 0; i < textString.length; i++) {
