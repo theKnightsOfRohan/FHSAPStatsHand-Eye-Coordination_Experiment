@@ -5,7 +5,7 @@ let screenHeight = window.innerHeight;
 let cursor;
 let elapsedTime;
 let jumpRate;
-let frameCount;
+let jumpFrameCount;
 let hasStarted;
 
 function setup() {
@@ -16,7 +16,7 @@ function setup() {
   textSize(32);
   frameRate(60);
   jumpRate = 300;
-  frameCount = 1;
+  jumpFrameCount = 1;
   hasStarted = false;
 }
 
@@ -40,9 +40,9 @@ function draw() {
     }
   }
 
-  frameCount++;
-  if ((frameCount %= jumpRate) <= 0.01) {
-    frameCount = 0;
+  jumpFrameCount++;
+  if ((jumpFrameCount %= 300) <= 0.01) {
+    jumpFrameCount = 0;
     cursor.jump(true);
     jumpRate *= 0.95;
     jumpRate = Math.floor(jumpRate);
