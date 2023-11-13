@@ -32,6 +32,7 @@ function draw() {
     );
     return;
   }
+  text("Errors: " + cursor.getRecentErrorPercentage() + "%", 50, 50);
   cursor.act(textString[cursor.y][cursor.x].getLoc());
   fill(0);
   for (let i = 0; i < textString.length; i++) {
@@ -47,6 +48,8 @@ function draw() {
     jumpRate *= 0.95;
     jumpRate = Math.floor(jumpRate);
   }
+
+  cursor.checkForFailure();
 
   if (cursor.over) {
     fill(0);
@@ -96,6 +99,8 @@ class Cursor {
     this.errorCount = 0;
     this.over = false;
     this.gameErrorCount = 0;
+    this.errorTimes = [];
+    this.recentCount = [];
   }
 
   act(loc) {
@@ -113,6 +118,8 @@ class Cursor {
     } else {
       this.errorCount++;
       this.gameErrorCount++;
+      this.errorTimes.push(performance.now());
+      this.recentCount.push(performance.now());
     }
   }
 
@@ -121,10 +128,15 @@ class Cursor {
     this.y = Math.floor(Math.random() * textString.length);
     this.letterToType = textString[this.y][this.x].getLetter();
     this.count++;
+    this.recentCount.push(performance.now());
     if (timeOut) {
       this.gameErrorCount++;
+      this.errorTimes.push(performance.now());
     }
-    if (this.getGameErrorPercentage() > this.rateOfFailure) {
+  }
+
+  checkForFailure() {
+    if (this.getRecentErrorPercentage() > this.rateOfFailure) {
       let endTime = performance.now();
       elapsedTime = endTime - this.startTime;
       this.over = true;
@@ -137,6 +149,22 @@ class Cursor {
 
   getErrorPercentage() {
     return (this.errorCount * 100) / this.count;
+  }
+
+  getRecentCount() {
+    this.recentCount = this.recentCount.filter((time) => {
+      return time > performance.now() - 10000;
+    });
+
+    return this.recentCount.length;
+  }
+
+  getRecentErrorPercentage() {
+    this.errorTimes = this.errorTimes.filter((time) => {
+      return time > performance.now() - 10000;
+    });
+
+    return (this.errorTimes.length * 100) / this.getRecentCount();
   }
 }
 
